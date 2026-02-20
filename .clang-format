@@ -1,0 +1,5 @@
+Language: Cpp
+Standard: c++20
+BreakBeforeBraces: Allman
+IndentWidth: 4
+TabWidth: 4
