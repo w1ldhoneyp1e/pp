@@ -1,5 +1,5 @@
-#include "archive.h"
-#include "../path/path.h"
+#include "Archive.h"
+#include "../Path/Path.h"
 #include <sys/wait.h>
 #include <unistd.h>
 

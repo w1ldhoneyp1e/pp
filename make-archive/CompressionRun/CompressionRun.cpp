@@ -1,7 +1,5 @@
-#define _POSIX_C_SOURCE 200809L
-
-#include "compression_run.h"
-#include "../compression/compression.h"
+#include "CompressionRun.h"
+#include "../Compression/Compression.h"
 #include <atomic>
 #include <iostream>
 #include <sys/stat.h>

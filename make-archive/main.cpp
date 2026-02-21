@@ -1,9 +1,9 @@
-#include "archive/archive.h"
-#include "args/args.h"
-#include "compression_run/compression_run.h"
-#include "path/path.h"
-#include "temp/temp.h"
-#include "time/time.h"
+#include "Archive/Archive.h"
+#include "Args/Args.h"
+#include "CompressionRun/CompressionRun.h"
+#include "Path/Path.h"
+#include "Temp/Temp.h"
+#include "Time/Time.h"
 #include <cerrno>
 #include <cstring>
 #include <iostream>
@@ -22,16 +22,16 @@ static std::string CreateTempDir()
     return std::string(buf);
 }
 
-static std::vector<std::string> BuildGzPaths(const std::string &tempDir,
-                                             const std::vector<std::string> &inputFiles)
+static std::vector<std::string>
+BuildGzPaths(const std::string &tempDir,
+             const std::vector<std::string> &inputFiles)
 {
     std::vector<std::string> gzPaths;
     gzPaths.reserve(inputFiles.size());
     for (size_t i = 0; i < inputFiles.size(); i++)
     {
-        gzPaths.push_back(
-            tempDir + "/" +
-            UniqueGzName(inputFiles[i], static_cast<int>(i)));
+        gzPaths.push_back(tempDir + "/" +
+                          UniqueGzName(inputFiles[i], static_cast<int>(i)));
     }
     return gzPaths;
 }

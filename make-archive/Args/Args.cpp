@@ -1,6 +1,6 @@
 #define _POSIX_C_SOURCE 200809L
 
-#include "args.h"
+#include "Args.h"
 #include <cstdlib>
 #include <iostream>
 #include <unistd.h>
