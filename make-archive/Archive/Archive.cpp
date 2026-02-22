@@ -1,11 +1,12 @@
 #include "Archive.h"
-#include "../Path/Path.h"
+#include "Path/Path.h"
 #include <sys/wait.h>
 #include <unistd.h>
 
-bool RunTar(const std::string &archivePath, const std::string &tempDir)
+bool TarRunner::Run(const std::string &archivePath,
+                    const std::string &tempDir) const
 {
-    std::string absArchive = GetAbsoluteArchivePath(archivePath);
+    std::string absArchive = PathHelper::GetAbsoluteArchivePath(archivePath);
     if (absArchive.empty())
     {
         return false;

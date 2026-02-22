@@ -1,3 +1,6 @@
 #pragma once
 
-double NowMonotonic();
+struct Clock
+{
+    static double Now();
+};

@@ -2,6 +2,9 @@
 
 #include <string>
 
-std::string BasenameSafe(const std::string& path);
-std::string UniqueGzName(const std::string& inputPath, int index);
-std::string GetAbsoluteArchivePath(const std::string& archivePath);
+struct PathHelper
+{
+    static std::string BasenameSafe(const std::string &path);
+    static std::string UniqueGzName(const std::string &inputPath, int index);
+    static std::string GetAbsoluteArchivePath(const std::string &archivePath);
+};

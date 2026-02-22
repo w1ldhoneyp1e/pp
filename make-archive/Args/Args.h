@@ -1,5 +1,6 @@
 #pragma once
 
+#include <optional>
 #include <string>
 #include <vector>
 
@@ -11,4 +12,7 @@ struct ParsedArgs
     std::vector<std::string> inputFiles;
 };
 
-bool ParseArgs(int argc, char **argv, ParsedArgs &out);
+struct ArgsParser
+{
+    static std::optional<ParsedArgs> Parse(int argc, char **argv);
+};

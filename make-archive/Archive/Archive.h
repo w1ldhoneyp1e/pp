@@ -2,4 +2,8 @@
 
 #include <string>
 
-bool RunTar(const std::string& archivePath, const std::string& tempDir);
+struct TarRunner
+{
+    bool Run(const std::string &archivePath,
+             const std::string &tempDir) const;
+};

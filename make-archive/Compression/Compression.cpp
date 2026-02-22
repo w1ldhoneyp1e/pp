@@ -3,7 +3,8 @@
 #include <sys/wait.h>
 #include <unistd.h>
 
-bool CompressOne(const char *inputPath, const char *gzPath)
+bool GzipCompressor::CompressOne(const std::string &inputPath,
+                                 const std::string &gzPath) const
 {
     pid_t pid = fork();
     if (pid < 0)
@@ -12,7 +13,7 @@ bool CompressOne(const char *inputPath, const char *gzPath)
     }
     if (pid == 0)
     {
-        int fd = open(gzPath, O_WRONLY | O_CREAT | O_TRUNC, 0644);
+        int fd = open(gzPath.c_str(), O_WRONLY | O_CREAT | O_TRUNC, 0644);
         if (fd < 0)
         {
             _exit(127);
@@ -23,7 +24,8 @@ bool CompressOne(const char *inputPath, const char *gzPath)
             _exit(127);
         }
         close(fd);
-        execlp("gzip", "gzip", "-c", inputPath, static_cast<char *>(nullptr));
+        execlp("gzip", "gzip", "-c", inputPath.c_str(),
+               static_cast<char *>(nullptr));
         _exit(127);
     }
     int status;

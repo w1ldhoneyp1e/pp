@@ -1,6 +1,7 @@
+#include "Time.h"
 #include <time.h>
 
-double NowMonotonic()
+double Clock::Now()
 {
     struct timespec ts;
     if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0)

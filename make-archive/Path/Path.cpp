@@ -2,13 +2,13 @@
 #include <limits.h>
 #include <unistd.h>
 
-std::string BasenameSafe(const std::string &path)
+std::string PathHelper::BasenameSafe(const std::string &path)
 {
     size_t pos = path.rfind('/');
     return pos == std::string::npos ? path : path.substr(pos + 1);
 }
 
-std::string UniqueGzName(const std::string &inputPath, int index)
+std::string PathHelper::UniqueGzName(const std::string &inputPath, int index)
 {
     std::string base = BasenameSafe(inputPath);
     if (base.size() > 240)
@@ -23,7 +23,7 @@ std::string UniqueGzName(const std::string &inputPath, int index)
     return base + "_" + std::to_string(index) + ".gz";
 }
 
-std::string GetAbsoluteArchivePath(const std::string &archivePath)
+std::string PathHelper::GetAbsoluteArchivePath(const std::string &archivePath)
 {
     if (!archivePath.empty() && archivePath[0] == '/')
     {

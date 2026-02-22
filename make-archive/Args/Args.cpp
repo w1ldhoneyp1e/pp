@@ -5,8 +5,9 @@
 #include <iostream>
 #include <unistd.h>
 
-bool ParseArgs(int argc, char **argv, ParsedArgs &out)
+std::optional<ParsedArgs> ArgsParser::Parse(int argc, char **argv)
 {
+    ParsedArgs out;
     int opt;
     while ((opt = getopt(argc, argv, "SP:")) != -1)
     {
@@ -20,32 +21,32 @@ bool ParseArgs(int argc, char **argv, ParsedArgs &out)
             if (out.numProcesses <= 0)
             {
                 std::cerr << "make-archive: -P requires positive number\n";
-                return false;
+                return std::nullopt;
             }
             break;
         default:
             std::cerr << "Usage: make-archive -S ARCHIVE-NAME [INPUT-FILES]\n"
                       << "       make-archive -P NUM-PROCESSES ARCHIVE-NAME "
                          "[INPUT-FILES]\n";
-            return false;
+            return std::nullopt;
         }
     }
 
     if (!out.sequential && out.numProcesses == 0)
     {
         std::cerr << "make-archive: specify -S or -P NUM-PROCESSES\n";
-        return false;
+        return std::nullopt;
     }
     if (out.sequential && out.numProcesses != 0)
     {
         std::cerr << "make-archive: use either -S or -P, not both\n";
-        return false;
+        return std::nullopt;
     }
 
     if (optind >= argc)
     {
         std::cerr << "make-archive: ARCHIVE-NAME required\n";
-        return false;
+        return std::nullopt;
     }
 
     out.archiveName = argv[optind++];
@@ -57,8 +58,8 @@ bool ParseArgs(int argc, char **argv, ParsedArgs &out)
     if (out.inputFiles.empty())
     {
         std::cerr << "make-archive: at least one INPUT-FILE required\n";
-        return false;
+        return std::nullopt;
     }
 
-    return true;
+    return out;
 }
