@@ -12,7 +12,7 @@ struct ParsedArgs
     std::vector<std::string> inputFiles;
 };
 
-struct ArgsParser
+namespace ArgsParser
 {
-    static std::optional<ParsedArgs> Parse(int argc, char **argv);
-};
+    std::optional<ParsedArgs> Parse(int argc, char **argv);
+}

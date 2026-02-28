@@ -5,7 +5,10 @@
 #include <iostream>
 #include <unistd.h>
 
-std::optional<ParsedArgs> ArgsParser::Parse(int argc, char **argv)
+namespace ArgsParser
+{
+
+std::optional<ParsedArgs> Parse(int argc, char **argv)
 {
     ParsedArgs out;
     int opt;
@@ -62,4 +65,6 @@ std::optional<ParsedArgs> ArgsParser::Parse(int argc, char **argv)
     }
 
     return out;
+}
+
 }

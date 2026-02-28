@@ -8,6 +8,7 @@ SRCS = make-archive/main.cpp \
        make-archive/Compression/Compression.cpp \
        make-archive/CompressionRun/CompressionRun.cpp \
        make-archive/Path/Path.cpp \
+       make-archive/Pipeline/Pipeline.cpp \
        make-archive/Temp/Temp.cpp \
        make-archive/Time/Time.cpp
 OBJS = $(SRCS:.cpp=.o)

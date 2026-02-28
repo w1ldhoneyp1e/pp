@@ -1,4 +1,4 @@
-#include "CompressionRun.h"
+#include "./CompressionRun.h"
 #include <iostream>
 #include <sys/stat.h>
 #include <thread>
@@ -25,7 +25,8 @@ void CompressionRunner::ReportGzipFailure(const std::string &inputPath)
     std::cerr << "make-archive: gzip failed for " << inputPath << std::endl;
 }
 
-size_t CompressionRunner::ComputeNumWorkers(size_t numProcesses, size_t numFiles)
+size_t CompressionRunner::ComputeNumWorkers(size_t numProcesses,
+                                            size_t numFiles)
 {
     size_t numWorkers = numProcesses;
     if (numWorkers > numFiles)
@@ -50,7 +51,7 @@ void CompressionRunner::RunWorkerPool(
             {
                 break;
             }
-            if (!compressor_.CompressOne(inputFiles[i], gzPaths[i]))
+            if (!compressor.CompressOne(inputFiles[i], gzPaths[i]))
             {
                 anyFailed = true;
                 size_t expected = inputFiles.size();
@@ -74,7 +75,7 @@ bool CompressionRunner::RunSequential(
 {
     for (size_t i = 0; i < inputFiles.size(); i++)
     {
-        if (!compressor_.CompressOne(inputFiles[i], gzPaths[i]))
+        if (!compressor.CompressOne(inputFiles[i], gzPaths[i]))
         {
             ReportGzipFailure(inputFiles[i]);
             return false;
@@ -83,9 +84,9 @@ bool CompressionRunner::RunSequential(
     return true;
 }
 
-bool CompressionRunner::RunParallel(
-    const std::vector<std::string> &inputFiles,
-    const std::vector<std::string> &gzPaths, int numProcesses) const
+bool CompressionRunner::RunParallel(const std::vector<std::string> &inputFiles,
+                                    const std::vector<std::string> &gzPaths,
+                                    int numProcesses) const
 {
     std::atomic<size_t> nextIndex(0);
     std::atomic<bool> anyFailed(false);

@@ -1,7 +1,10 @@
 #include "Time.h"
 #include <time.h>
 
-double Clock::Now()
+namespace Clock
+{
+
+double Now()
 {
     struct timespec ts;
     if (clock_gettime(CLOCK_MONOTONIC, &ts) != 0)
@@ -11,4 +14,6 @@ double Clock::Now()
 
     return static_cast<double>(ts.tv_sec) +
            static_cast<double>(ts.tv_nsec) / 1e9;
+}
+
 }

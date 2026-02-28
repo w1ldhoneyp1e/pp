@@ -4,14 +4,15 @@
 #include <string>
 #include <vector>
 
-struct TempDir
+class TempDir
 {
+  public:
     static std::optional<TempDir> Create();
 
     std::string Path() const;
     void Remove(const std::vector<std::string> &gzPaths);
 
-private:
+  private:
     explicit TempDir(std::string path);
 
     std::string path_;

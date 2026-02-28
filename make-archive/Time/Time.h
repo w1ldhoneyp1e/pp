@@ -1,6 +1,6 @@
 #pragma once
 
-struct Clock
+namespace Clock
 {
-    static double Now();
-};
+    double Now();
+}
