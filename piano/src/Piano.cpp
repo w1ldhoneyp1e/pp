@@ -9,7 +9,7 @@
 namespace
 {
 
-constexpr double kTwoPi = 6.28318530717958647692;
+constexpr double DOUBLE_PI = 6.28318530717958647692;
 
 bool pointInRect(int x, int y, const SDL_Rect &rect)
 {
@@ -42,28 +42,28 @@ void Piano::run()
                                  SDL_GetError());
     }
 
-    window_ = SDL_CreateWindow("Piano", SDL_WINDOWPOS_CENTERED,
-                               SDL_WINDOWPOS_CENTERED, kWindowWidth,
-                               kWindowHeight, SDL_WINDOW_SHOWN);
-    if (!window_)
+    window = SDL_CreateWindow("Piano", SDL_WINDOWPOS_CENTERED,
+                              SDL_WINDOWPOS_CENTERED, WINDOW_WIDTH,
+                              WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
+    if (!window)
     {
         SDL_Quit();
         throw std::runtime_error(std::string("SDL_CreateWindow failed: ") +
                                  SDL_GetError());
     }
 
-    renderer_ = SDL_CreateRenderer(
-        window_, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    if (!renderer_)
+    renderer = SDL_CreateRenderer(
+        window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    if (!renderer)
     {
-        SDL_DestroyWindow(window_);
+        SDL_DestroyWindow(window);
         SDL_Quit();
         throw std::runtime_error(std::string("SDL_CreateRenderer failed: ") +
                                  SDL_GetError());
     }
 
     SDL_AudioSpec want{};
-    want.freq = kSampleRate;
+    want.freq = SAMPLE_RATE;
     want.format = AUDIO_F32SYS;
     want.channels = 2;
     want.samples = 1024;
@@ -71,11 +71,11 @@ void Piano::run()
     want.userdata = this;
 
     SDL_AudioSpec have{};
-    audioDevice_ = SDL_OpenAudioDevice(nullptr, 0, &want, &have, 0);
-    if (audioDevice_ == 0)
+    audioDevice = SDL_OpenAudioDevice(nullptr, 0, &want, &have, 0);
+    if (audioDevice == 0)
     {
-        SDL_DestroyRenderer(renderer_);
-        SDL_DestroyWindow(window_);
+        SDL_DestroyRenderer(renderer);
+        SDL_DestroyWindow(window);
         SDL_Quit();
         throw std::runtime_error(std::string("SDL_OpenAudioDevice failed: ") +
                                  SDL_GetError());
@@ -83,7 +83,7 @@ void Piano::run()
 
     initMappings();
     initVisualKeys();
-    SDL_PauseAudioDevice(audioDevice_, 0);
+    SDL_PauseAudioDevice(audioDevice, 0);
 
     bool running = true;
     while (running)
@@ -97,31 +97,31 @@ void Piano::run()
         render();
     }
 
-    SDL_CloseAudioDevice(audioDevice_);
-    SDL_DestroyRenderer(renderer_);
-    SDL_DestroyWindow(window_);
+    SDL_CloseAudioDevice(audioDevice);
+    SDL_DestroyRenderer(renderer);
+    SDL_DestroyWindow(window);
     SDL_Quit();
 }
 
 void Piano::initMappings()
 {
-    keyToIndex_.fill(-1);
+    keyToIndex.fill(-1);
     for (int i = 0; i < static_cast<int>(KEYS.size()); ++i)
     {
-        keyToIndex_[KEYS[i].scancode] = i;
+        keyToIndex[KEYS[i].scancode] = i;
     }
 }
 
 void Piano::initVisualKeys()
 {
-    whiteVisualKeys_.clear();
-    blackVisualKeys_.clear();
+    whiteVisualKeys.clear();
+    blackVisualKeys.clear();
 
     const int marginX = 20;
     const int top = 20;
-    const int whiteHeight = kWindowHeight - 40;
+    const int whiteHeight = WINDOW_HEIGHT - 40;
     const int whiteCount = 14;
-    const int whiteWidth = (kWindowWidth - marginX * 2) / whiteCount;
+    const int whiteWidth = (WINDOW_WIDTH - marginX * 2) / whiteCount;
 
     int whiteIndex = 0;
     for (int i = 0; i < static_cast<int>(KEYS.size()); ++i)
@@ -133,7 +133,7 @@ void Piano::initVisualKeys()
 
         SDL_Rect rect{marginX + whiteIndex * whiteWidth, top, whiteWidth - 2,
                       whiteHeight};
-        whiteVisualKeys_.push_back({rect, i, false});
+        whiteVisualKeys.push_back({rect, i, false});
         ++whiteIndex;
     }
 
@@ -150,7 +150,7 @@ void Piano::initVisualKeys()
         const int leftWhiteX = marginX + after * whiteWidth;
         const int x = leftWhiteX + whiteWidth - blackWidth / 2;
         SDL_Rect rect{x, top, blackWidth, blackHeight};
-        blackVisualKeys_.push_back({rect, i, true});
+        blackVisualKeys.push_back({rect, i, true});
     }
 }
 
@@ -199,13 +199,13 @@ void Piano::handleEvent(const SDL_Event &event, bool &running)
 
 void Piano::handleKeyboard(SDL_Scancode scancode, bool pressed)
 {
-    const int keyIndex = keyToIndex_[scancode];
+    const int keyIndex = keyToIndex[scancode];
     if (keyIndex < 0)
     {
         return;
     }
 
-    keyboardPressed_[keyIndex] = pressed;
+    keyboardPressed[keyIndex] = pressed;
     updateLogicalState(keyIndex);
 }
 
@@ -213,12 +213,12 @@ void Piano::handleMouseButton(int x, int y, bool pressed)
 {
     if (pressed)
     {
-        if (activeMouseKey_ >= 0)
+        if (activeMouseKey >= 0)
         {
-            mousePressedCount_[activeMouseKey_] =
-                std::max(0, mousePressedCount_[activeMouseKey_] - 1);
-            updateLogicalState(activeMouseKey_);
-            activeMouseKey_ = -1;
+            mousePressedCount[activeMouseKey] =
+                std::max(0, mousePressedCount[activeMouseKey] - 1);
+            updateLogicalState(activeMouseKey);
+            activeMouseKey = -1;
         }
 
         const int keyIndex = pickKeyByPoint(x, y);
@@ -227,34 +227,34 @@ void Piano::handleMouseButton(int x, int y, bool pressed)
             return;
         }
 
-        ++mousePressedCount_[keyIndex];
-        activeMouseKey_ = keyIndex;
+        ++mousePressedCount[keyIndex];
+        activeMouseKey = keyIndex;
         updateLogicalState(keyIndex);
 
         return;
     }
 
-    if (activeMouseKey_ < 0)
+    if (activeMouseKey < 0)
     {
         return;
     }
 
-    mousePressedCount_[activeMouseKey_] =
-        std::max(0, mousePressedCount_[activeMouseKey_] - 1);
-    updateLogicalState(activeMouseKey_);
-    activeMouseKey_ = -1;
+    mousePressedCount[activeMouseKey] =
+        std::max(0, mousePressedCount[activeMouseKey] - 1);
+    updateLogicalState(activeMouseKey);
+    activeMouseKey = -1;
 }
 
 void Piano::updateLogicalState(int keyIndex)
 {
     const bool nowPressed =
-        keyboardPressed_[keyIndex] || mousePressedCount_[keyIndex] > 0;
-    if (nowPressed == logicalPressed_[keyIndex])
+        keyboardPressed[keyIndex] || mousePressedCount[keyIndex] > 0;
+    if (nowPressed == logicalPressed[keyIndex])
     {
         return;
     }
 
-    logicalPressed_[keyIndex] = nowPressed;
+    logicalPressed[keyIndex] = nowPressed;
     if (nowPressed)
     {
         noteOn(keyIndex);
@@ -267,8 +267,8 @@ void Piano::updateLogicalState(int keyIndex)
 
 void Piano::noteOn(int keyIndex)
 {
-    std::lock_guard<std::mutex> lock(voicesMutex_);
-    voices_[keyIndex] =
+    std::lock_guard<std::mutex> lock(voicesMutex);
+    voices[keyIndex] =
         Voice{.frequency = semitoneToFrequency(KEYS[keyIndex].semitoneOffset),
               .phase = 0.0,
               .amplitude = 0.0,
@@ -278,20 +278,20 @@ void Piano::noteOn(int keyIndex)
 
 void Piano::noteOff(int keyIndex)
 {
-    std::lock_guard<std::mutex> lock(voicesMutex_);
-    auto it = voices_.find(keyIndex);
-    if (it == voices_.end())
+    std::lock_guard<std::mutex> lock(voicesMutex);
+    auto it = voices.find(keyIndex);
+    if (it == voices.end())
     {
         return;
     }
 
     it->second.pressed = false;
-    it->second.releaseSamplesLeft = (kSampleRate * kReleaseMs) / 1000;
+    it->second.releaseSamplesLeft = (SAMPLE_RATE * RELEASE_MS) / 1000;
 }
 
 int Piano::pickKeyByPoint(int x, int y) const
 {
-    for (const auto &key : blackVisualKeys_)
+    for (const auto &key : blackVisualKeys)
     {
         if (pointInRect(x, y, key.rect))
         {
@@ -299,7 +299,7 @@ int Piano::pickKeyByPoint(int x, int y) const
         }
     }
 
-    for (const auto &key : whiteVisualKeys_)
+    for (const auto &key : whiteVisualKeys)
     {
         if (pointInRect(x, y, key.rect))
         {
@@ -312,42 +312,42 @@ int Piano::pickKeyByPoint(int x, int y) const
 
 void Piano::render()
 {
-    SDL_SetRenderDrawColor(renderer_, 230, 230, 230, 255);
-    SDL_RenderClear(renderer_);
+    SDL_SetRenderDrawColor(renderer, 230, 230, 230, 255);
+    SDL_RenderClear(renderer);
 
-    for (const auto &key : whiteVisualKeys_)
+    for (const auto &key : whiteVisualKeys)
     {
-        const bool pressed = logicalPressed_[key.keyIndex];
+        const bool pressed = logicalPressed[key.keyIndex];
         if (pressed)
         {
-            SDL_SetRenderDrawColor(renderer_, 242, 188, 195, 255);
+            SDL_SetRenderDrawColor(renderer, 242, 188, 195, 255);
         }
         else
         {
-            SDL_SetRenderDrawColor(renderer_, 255, 255, 255, 255);
+            SDL_SetRenderDrawColor(renderer, 255, 255, 255, 255);
         }
-        SDL_RenderFillRect(renderer_, &key.rect);
-        SDL_SetRenderDrawColor(renderer_, 40, 40, 40, 255);
-        SDL_RenderDrawRect(renderer_, &key.rect);
+        SDL_RenderFillRect(renderer, &key.rect);
+        SDL_SetRenderDrawColor(renderer, 40, 40, 40, 255);
+        SDL_RenderDrawRect(renderer, &key.rect);
     }
 
-    for (const auto &key : blackVisualKeys_)
+    for (const auto &key : blackVisualKeys)
     {
-        const bool pressed = logicalPressed_[key.keyIndex];
+        const bool pressed = logicalPressed[key.keyIndex];
         if (pressed)
         {
-            SDL_SetRenderDrawColor(renderer_, 215, 0, 122, 255);
+            SDL_SetRenderDrawColor(renderer, 215, 0, 122, 255);
         }
         else
         {
-            SDL_SetRenderDrawColor(renderer_, 0, 0, 0, 255);
+            SDL_SetRenderDrawColor(renderer, 0, 0, 0, 255);
         }
-        SDL_RenderFillRect(renderer_, &key.rect);
-        SDL_SetRenderDrawColor(renderer_, 35, 35, 35, 255);
-        SDL_RenderDrawRect(renderer_, &key.rect);
+        SDL_RenderFillRect(renderer, &key.rect);
+        SDL_SetRenderDrawColor(renderer, 35, 35, 35, 255);
+        SDL_RenderDrawRect(renderer, &key.rect);
     }
 
-    SDL_RenderPresent(renderer_);
+    SDL_RenderPresent(renderer);
 }
 
 double Piano::semitoneToFrequency(int semitoneOffset)
@@ -368,14 +368,14 @@ void Piano::renderAudio(float *out, int frames)
 {
     std::fill(out, out + frames * 2, 0.0f);
 
-    const int attackSamples = std::max(1, (kSampleRate * kAttackMs) / 1000);
+    const int attackSamples = std::max(1, (SAMPLE_RATE * ATTACK_MS) / 1000);
 
-    std::lock_guard<std::mutex> lock(voicesMutex_);
+    std::lock_guard<std::mutex> lock(voicesMutex);
     for (int frame = 0; frame < frames; ++frame)
     {
         double sample = 0.0;
 
-        for (auto it = voices_.begin(); it != voices_.end();)
+        for (auto it = voices.begin(); it != voices.end();)
         {
             Voice &voice = it->second;
 
@@ -395,17 +395,17 @@ void Piano::renderAudio(float *out, int frames)
             }
 
             voice.phase +=
-                kTwoPi * voice.frequency / static_cast<double>(kSampleRate);
-            if (voice.phase >= kTwoPi)
+                DOUBLE_PI * voice.frequency / static_cast<double>(SAMPLE_RATE);
+            if (voice.phase >= DOUBLE_PI)
             {
-                voice.phase -= kTwoPi;
+                voice.phase -= DOUBLE_PI;
             }
 
             sample += std::sin(voice.phase) * voice.amplitude;
 
             if (!voice.pressed && voice.releaseSamplesLeft <= 0)
             {
-                it = voices_.erase(it);
+                it = voices.erase(it);
             }
             else
             {
@@ -414,7 +414,7 @@ void Piano::renderAudio(float *out, int frames)
         }
 
         const float clipped =
-            static_cast<float>(std::tanh(sample * 0.5) * kMasterGain);
+            static_cast<float>(std::tanh(sample * 0.5) * MASTER_GAIN);
         out[frame * 2] = clipped;
         out[frame * 2 + 1] = clipped;
     }

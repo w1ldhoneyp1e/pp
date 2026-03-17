@@ -8,7 +8,10 @@ SDL_CFLAGS := $(shell pkg-config --cflags sdl2)
 SDL_LIBS := $(shell pkg-config --libs sdl2)
 
 SRCS := $(SRCDIR)/main.cpp \
-        $(SRCDIR)/PianoApp.cpp
+        $(SRCDIR)/PianoModel.cpp \
+        $(SRCDIR)/PianoView.cpp \
+        $(SRCDIR)/AudioEngine.cpp \
+        $(SRCDIR)/PianoController.cpp
 
 OBJS := $(patsubst $(SRCDIR)/%.cpp,$(BUILDDIR)/%.o,$(SRCS))
 

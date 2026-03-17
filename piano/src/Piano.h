@@ -38,29 +38,29 @@ class Piano
         bool isBlack;
     };
 
-    static constexpr int kWindowWidth = 1120;
-    static constexpr int kWindowHeight = 360;
-    static constexpr int kSampleRate = 48000;
-    static constexpr int kReleaseMs = 500;
-    static constexpr int kAttackMs = 10;
-    static constexpr float kMasterGain = 0.22f;
+    static constexpr int WINDOW_WIDTH = 1120;
+    static constexpr int WINDOW_HEIGHT = 360;
+    static constexpr int SAMPLE_RATE = 48000;
+    static constexpr int RELEASE_MS = 500;
+    static constexpr int ATTACK_MS = 10;
+    static constexpr float MASTER_GAIN = 0.22f;
 
     static const std::array<KeyDef, 24> KEYS;
 
-    SDL_Window *window_ = nullptr;
-    SDL_Renderer *renderer_ = nullptr;
-    SDL_AudioDeviceID audioDevice_ = 0;
-    std::array<int, SDL_NUM_SCANCODES> keyToIndex_{};
-    std::array<bool, 24> keyboardPressed_{};
-    std::array<int, 24> mousePressedCount_{};
-    std::array<bool, 24> logicalPressed_{};
-    int activeMouseKey_ = -1;
+    SDL_Window *window = nullptr;
+    SDL_Renderer *renderer = nullptr;
+    SDL_AudioDeviceID audioDevice = 0;
+    std::array<int, SDL_NUM_SCANCODES> keyToIndex{};
+    std::array<bool, 24> keyboardPressed{};
+    std::array<int, 24> mousePressedCount{};
+    std::array<bool, 24> logicalPressed{};
+    int activeMouseKey = -1;
 
-    std::vector<VisualKey> whiteVisualKeys_;
-    std::vector<VisualKey> blackVisualKeys_;
+    std::vector<VisualKey> whiteVisualKeys;
+    std::vector<VisualKey> blackVisualKeys;
 
-    std::mutex voicesMutex_;
-    std::unordered_map<int, Voice> voices_;
+    std::mutex voicesMutex;
+    std::unordered_map<int, Voice> voices;
 
     void initMappings();
     void initVisualKeys();

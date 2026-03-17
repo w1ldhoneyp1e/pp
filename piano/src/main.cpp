@@ -1,4 +1,4 @@
-#include "Piano.h"
+#include "PianoController.h"
 
 #include <exception>
 #include <iostream>
@@ -7,8 +7,8 @@ int main()
 {
     try
     {
-        Piano piano;
-        piano.run();
+        PianoController controller;
+        controller.run();
     }
     catch (const std::exception &e)
     {
