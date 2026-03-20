@@ -8,12 +8,9 @@
 
 namespace
 {
-std::atomic<bool> gStopRequested = false;
+std::atomic<bool> stopRequested = false;
 
-void HandleSignal(int)
-{
-    gStopRequested.store(true, std::memory_order_relaxed);
-}
+void HandleSignal(int) { stopRequested.store(true, std::memory_order_relaxed); }
 } // namespace
 
 int main(int argc, char **argv)
@@ -25,7 +22,7 @@ int main(int argc, char **argv)
 
         const CliOptions options = ParseArgs(argc, argv);
         Simulation simulation(options.verbose);
-        simulation.Run(options.parallel, options.duration, gStopRequested);
+        simulation.Run(options.parallel, options.duration, stopRequested);
         const SimulationReport report = simulation.BuildReport();
 
         std::cout << "Operations count: " << report.operationsCount << '\n';

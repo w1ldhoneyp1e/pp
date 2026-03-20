@@ -12,22 +12,24 @@ using Money = long long;
 
 class BankOperationError : public std::runtime_error
 {
-public:
+  public:
     using runtime_error::runtime_error;
 };
 
 class Bank
 {
-public:
+  public:
     explicit Bank(Money cash);
 
-    Bank(const Bank&) = delete;
-    Bank& operator=(const Bank&) = delete;
+    Bank(const Bank &) = delete;
+    Bank &operator=(const Bank &) = delete;
 
     unsigned long long GetOperationsCount() const;
 
-    void SendMoney(AccountId srcAccountId, AccountId dstAccountId, Money amount);
-    [[nodiscard]] bool TrySendMoney(AccountId srcAccountId, AccountId dstAccountId, Money amount);
+    void SendMoney(AccountId srcAccountId, AccountId dstAccountId,
+                   Money amount);
+    [[nodiscard]] bool TrySendMoney(AccountId srcAccountId,
+                                    AccountId dstAccountId, Money amount);
 
     [[nodiscard]] Money GetCash() const;
     Money GetAccountBalance(AccountId accountId) const;
@@ -40,11 +42,11 @@ public:
     [[nodiscard]] AccountId OpenAccount();
     [[nodiscard]] Money CloseAccount(AccountId accountId);
 
-private:
+  private:
     struct Account
     {
         Money balance = 0;
-        mutable std::mutex mutex;
+        mutable std::shared_mutex mutex;
     };
 
     using AccountPtr = std::shared_ptr<Account>;
@@ -53,15 +55,16 @@ private:
     static void ValidateNonNegative(Money amount);
 
     AccountPtr GetAccountOrThrow(AccountId accountId) const;
-    std::pair<AccountPtr, AccountPtr> GetTwoAccountsOrThrow(AccountId srcAccountId, AccountId dstAccountId) const;
+    std::pair<AccountPtr, AccountPtr>
+    GetTwoAccountsOrThrow(AccountId srcAccountId, AccountId dstAccountId) const;
 
-private:
-    mutable std::shared_mutex accountsMutex_;
-    std::unordered_map<AccountId, AccountPtr> accounts_;
-    AccountId nextAccountId_ = 1;
+  private:
+    mutable std::shared_mutex m_accountsMutex;
+    std::unordered_map<AccountId, AccountPtr> m_accounts;
+    AccountId m_nextAccountId = 1;
 
-    mutable std::mutex cashMutex_;
-    Money cash_ = 0;
+    mutable std::mutex m_cashMutex;
+    Money m_cash = 0;
 
-    mutable std::atomic<unsigned long long> operationsCount_ = 0;
+    mutable std::atomic<unsigned long long> m_operationsCount = 0;
 };
