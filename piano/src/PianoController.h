@@ -12,12 +12,12 @@ class PianoController
     void run();
 
   private:
-    SDL_Window *window = nullptr;
-    SDL_Renderer *renderer = nullptr;
-    PianoModel model;
-    PianoView view;
-    AudioEngine audioEngine;
-    int activeMouseKey = -1;
+    SDL_Window *m_window = nullptr;
+    SDL_Renderer *m_renderer = nullptr;
+    PianoModel m_model;
+    PianoView m_view;
+    AudioEngine m_audioEngine;
+    int m_activeMouseKey = -1;
 
     void handleEvent(const SDL_Event &event, bool &running);
     void applyTransition(int keyIndex, PianoModel::Transition transition);

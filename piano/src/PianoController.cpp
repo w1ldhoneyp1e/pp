@@ -11,19 +11,19 @@ void PianoController::run()
                                  SDL_GetError());
     }
 
-    window = SDL_CreateWindow("Piano", SDL_WINDOWPOS_CENTERED,
-                              SDL_WINDOWPOS_CENTERED, PianoView::WINDOW_WIDTH,
-                              PianoView::WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
-    if (!window)
+    m_window = SDL_CreateWindow("Piano", SDL_WINDOWPOS_CENTERED,
+                                SDL_WINDOWPOS_CENTERED, PianoView::WINDOW_WIDTH,
+                                PianoView::WINDOW_HEIGHT, SDL_WINDOW_SHOWN);
+    if (!m_window)
     {
         SDL_Quit();
         throw std::runtime_error(std::string("SDL_CreateWindow failed: ") +
                                  SDL_GetError());
     }
 
-    renderer = SDL_CreateRenderer(
-        window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
-    if (!renderer)
+    m_renderer = SDL_CreateRenderer(
+        m_window, -1, SDL_RENDERER_ACCELERATED | SDL_RENDERER_PRESENTVSYNC);
+    if (!m_renderer)
     {
         cleanup();
         throw std::runtime_error(std::string("SDL_CreateRenderer failed: ") +
@@ -32,8 +32,8 @@ void PianoController::run()
 
     try
     {
-        view.init();
-        audioEngine.init();
+        m_view.init();
+        m_audioEngine.init();
     }
     catch (...)
     {
@@ -50,7 +50,7 @@ void PianoController::run()
             handleEvent(event, running);
         }
 
-        view.render(renderer, model);
+        m_view.render(m_renderer, m_model);
     }
 
     cleanup();
@@ -78,12 +78,12 @@ void PianoController::handleEvent(const SDL_Event &event, bool &running)
         if (event.key.repeat == 0)
         {
             const int keyIndex =
-                model.keyIndexByScancode(event.key.keysym.scancode);
+                m_model.keyIndexByScancode(event.key.keysym.scancode);
             if (keyIndex >= 0)
             {
                 const bool pressed = event.type == SDL_KEYDOWN;
                 const auto transition =
-                    model.setKeyboardPressed(keyIndex, pressed);
+                    m_model.setKeyboardPressed(keyIndex, pressed);
                 applyTransition(keyIndex, transition);
             }
         }
@@ -94,23 +94,24 @@ void PianoController::handleEvent(const SDL_Event &event, bool &running)
     if (event.type == SDL_MOUSEBUTTONDOWN &&
         event.button.button == SDL_BUTTON_LEFT)
     {
-        if (activeMouseKey >= 0)
+        if (m_activeMouseKey >= 0)
         {
-            const auto oldTransition = model.removeMousePressed(activeMouseKey);
-            applyTransition(activeMouseKey, oldTransition);
-            activeMouseKey = -1;
+            const auto oldTransition =
+                m_model.removeMousePressed(m_activeMouseKey);
+            applyTransition(m_activeMouseKey, oldTransition);
+            m_activeMouseKey = -1;
         }
 
         const int keyIndex =
-            view.pickKeyByPoint(event.button.x, event.button.y);
+            m_view.pickKeyByPoint(event.button.x, event.button.y);
         if (keyIndex < 0)
         {
             return;
         }
 
-        const auto transition = model.addMousePressed(keyIndex);
+        const auto transition = m_model.addMousePressed(keyIndex);
         applyTransition(keyIndex, transition);
-        activeMouseKey = keyIndex;
+        m_activeMouseKey = keyIndex;
 
         return;
     }
@@ -118,14 +119,14 @@ void PianoController::handleEvent(const SDL_Event &event, bool &running)
     if (event.type == SDL_MOUSEBUTTONUP &&
         event.button.button == SDL_BUTTON_LEFT)
     {
-        if (activeMouseKey < 0)
+        if (m_activeMouseKey < 0)
         {
             return;
         }
 
-        const auto transition = model.removeMousePressed(activeMouseKey);
-        applyTransition(activeMouseKey, transition);
-        activeMouseKey = -1;
+        const auto transition = m_model.removeMousePressed(m_activeMouseKey);
+        applyTransition(m_activeMouseKey, transition);
+        m_activeMouseKey = -1;
     }
 }
 
@@ -134,31 +135,31 @@ void PianoController::applyTransition(int keyIndex,
 {
     if (transition == PianoModel::Transition::Pressed)
     {
-        audioEngine.noteOn(keyIndex, model.frequencyForKey(keyIndex));
+        m_audioEngine.noteOn(keyIndex, m_model.frequencyForKey(keyIndex));
 
         return;
     }
 
     if (transition == PianoModel::Transition::Released)
     {
-        audioEngine.noteOff(keyIndex);
+        m_audioEngine.noteOff(keyIndex);
     }
 }
 
 void PianoController::cleanup()
 {
-    audioEngine.shutdown();
+    m_audioEngine.shutdown();
 
-    if (renderer)
+    if (m_renderer)
     {
-        SDL_DestroyRenderer(renderer);
-        renderer = nullptr;
+        SDL_DestroyRenderer(m_renderer);
+        m_renderer = nullptr;
     }
 
-    if (window)
+    if (m_window)
     {
-        SDL_DestroyWindow(window);
-        window = nullptr;
+        SDL_DestroyWindow(m_window);
+        m_window = nullptr;
     }
 
     SDL_Quit();

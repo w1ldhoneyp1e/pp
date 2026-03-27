@@ -25,45 +25,45 @@ void AudioEngine::init()
     want.userdata = this;
 
     SDL_AudioSpec have{};
-    audioDevice = SDL_OpenAudioDevice(nullptr, 0, &want, &have, 0);
-    if (audioDevice == 0)
+    m_audioDevice = SDL_OpenAudioDevice(nullptr, 0, &want, &have, 0);
+    if (m_audioDevice == 0)
     {
         throw std::runtime_error(std::string("SDL_OpenAudioDevice failed: ") +
                                  SDL_GetError());
     }
 
-    SDL_PauseAudioDevice(audioDevice, 0);
+    SDL_PauseAudioDevice(m_audioDevice, 0);
 }
 
 void AudioEngine::shutdown()
 {
-    if (audioDevice == 0)
+    if (m_audioDevice == 0)
     {
         return;
     }
 
-    SDL_CloseAudioDevice(audioDevice);
-    audioDevice = 0;
+    SDL_CloseAudioDevice(m_audioDevice);
+    m_audioDevice = 0;
 
-    std::lock_guard<std::mutex> lock(voicesMutex);
-    voices.clear();
+    std::lock_guard<std::mutex> lock(m_voicesMutex);
+    m_voices.clear();
 }
 
 void AudioEngine::noteOn(int keyIndex, double frequency)
 {
-    std::lock_guard<std::mutex> lock(voicesMutex);
-    voices[keyIndex] = Voice{.frequency = frequency,
-                             .phase = 0.0,
-                             .amplitude = 0.0,
-                             .pressed = true,
-                             .releaseSamplesLeft = 0};
+    std::lock_guard<std::mutex> lock(m_voicesMutex);
+    m_voices[keyIndex] = Voice{.frequency = frequency,
+                               .phase = 0.0,
+                               .amplitude = 0.0,
+                               .pressed = true,
+                               .releaseSamplesLeft = 0};
 }
 
 void AudioEngine::noteOff(int keyIndex)
 {
-    std::lock_guard<std::mutex> lock(voicesMutex);
-    auto it = voices.find(keyIndex);
-    if (it == voices.end())
+    std::lock_guard<std::mutex> lock(m_voicesMutex);
+    auto it = m_voices.find(keyIndex);
+    if (it == m_voices.end())
     {
         return;
     }
@@ -87,12 +87,12 @@ void AudioEngine::renderAudio(float *out, int frames)
 
     const int attackSamples = std::max(1, (SAMPLE_RATE * ATTACK_MS) / 1000);
 
-    std::lock_guard<std::mutex> lock(voicesMutex);
+    std::lock_guard<std::mutex> lock(m_voicesMutex);
     for (int frame = 0; frame < frames; ++frame)
     {
         double sample = 0.0;
 
-        for (auto it = voices.begin(); it != voices.end();)
+        for (auto it = m_voices.begin(); it != m_voices.end();)
         {
             Voice &voice = it->second;
 
@@ -122,7 +122,7 @@ void AudioEngine::renderAudio(float *out, int frames)
 
             if (!voice.pressed && voice.releaseSamplesLeft <= 0)
             {
-                it = voices.erase(it);
+                it = m_voices.erase(it);
             }
             else
             {

@@ -24,6 +24,6 @@ class PianoView
     int pickKeyByPoint(int x, int y) const;
 
   private:
-    std::vector<VisualKey> whiteVisualKeys;
-    std::vector<VisualKey> blackVisualKeys;
+    std::vector<VisualKey> m_whiteVisualKeys;
+    std::vector<VisualKey> m_blackVisualKeys;
 };

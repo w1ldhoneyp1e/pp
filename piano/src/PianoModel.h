@@ -36,10 +36,10 @@ class PianoModel
     double frequencyForKey(int keyIndex) const;
 
   private:
-    std::array<int, SDL_NUM_SCANCODES> keyToIndex_{};
-    std::array<bool, KEY_COUNT> keyboardPressed_{};
-    std::array<int, KEY_COUNT> mousePressedCount_{};
-    std::array<bool, KEY_COUNT> logicalPressed_{};
+    std::array<int, SDL_NUM_SCANCODES> m_keyToIndex{};
+    std::array<bool, KEY_COUNT> m_keyboardPressed{};
+    std::array<int, KEY_COUNT> m_mousePressedCount{};
+    std::array<bool, KEY_COUNT> m_logicalPressed{};
 
     Transition recomputeState(int keyIndex);
     static double semitoneToFrequency(int semitoneOffset);
