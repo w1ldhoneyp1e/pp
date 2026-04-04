@@ -8,7 +8,7 @@
 namespace
 {
 
-constexpr double DOUBLE_PI = 6.28318530717958647692;
+constexpr double DOUBLE_PI = 2 * M_PI;
 
 }
 
@@ -52,6 +52,17 @@ void AudioEngine::shutdown()
 void AudioEngine::noteOn(int keyIndex, double frequency)
 {
     std::lock_guard<std::mutex> lock(m_voicesMutex);
+    auto it = m_voices.find(keyIndex);
+    if (it != m_voices.end())
+    {
+        Voice &v = it->second;
+        v.frequency = frequency;
+        v.pressed = true;
+        v.releaseSamplesLeft = 0;
+
+        return;
+    }
+
     m_voices[keyIndex] = Voice{.frequency = frequency,
                                .phase = 0.0,
                                .amplitude = 0.0,
