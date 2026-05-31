@@ -23,7 +23,7 @@ void Bank::SendMoney(AccountId srcAccountId, AccountId dstAccountId,
         GetTwoAccountsOrThrow(srcAccountId, dstAccountId);
     if (srcAccountId == dstAccountId)
     {
-        std::lock_guard<std::shared_mutex> lock(srcAccount->mutex);
+        std::shared_lock<std::shared_mutex> lock(srcAccount->mutex);
         if (srcAccount->balance < amount)
         {
             throw BankOperationError("Insufficient funds on source account");
@@ -52,7 +52,7 @@ bool Bank::TrySendMoney(AccountId srcAccountId, AccountId dstAccountId,
         GetTwoAccountsOrThrow(srcAccountId, dstAccountId);
     if (srcAccountId == dstAccountId)
     {
-        std::lock_guard<std::shared_mutex> lock(srcAccount->mutex);
+        std::shared_lock<std::shared_mutex> lock(srcAccount->mutex);
         if (srcAccount->balance < amount)
         {
             return false;
@@ -190,6 +190,7 @@ void Bank::ValidateNonNegative(Money amount)
     }
 }
 
+// orThrow - убрать
 Bank::AccountPtr Bank::GetAccountOrThrow(AccountId accountId) const
 {
     std::shared_lock<std::shared_mutex> lock(m_accountsMutex);

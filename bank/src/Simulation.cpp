@@ -10,7 +10,7 @@ struct Simulation::Actor
 {
     std::string name;
     Money cash = 0;
-    mutable std::mutex mutex;
+    mutable std::mutex mutex; // Выяснить
 
     explicit Actor(std::string actorName) : name(std::move(actorName)) {}
 };
