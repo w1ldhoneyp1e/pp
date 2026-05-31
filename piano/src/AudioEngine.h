@@ -24,6 +24,8 @@ class AudioEngine
         double amplitude;
         bool pressed;
         int releaseSamplesLeft;
+        int releaseTotalSamples;
+        double releaseStartAmplitude;
     };
 
     static constexpr int SAMPLE_RATE = 48000;

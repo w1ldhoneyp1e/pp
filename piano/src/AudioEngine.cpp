@@ -10,7 +10,29 @@ namespace
 
 constexpr double DOUBLE_PI = 2 * M_PI;
 
+float clamp(float x, float lowerlimit = 0.0f, float upperlimit = 1.0f)
+{
+    if (x < lowerlimit)
+    {
+        return lowerlimit;
+    }
+
+    if (x > upperlimit)
+    {
+        return upperlimit;
+    }
+
+    return x;
 }
+
+float smoothstep(float edge0, float edge1, float x)
+{
+    x = clamp((x - edge0) / (edge1 - edge0));
+
+    return x * x * (3.0f - 2.0f * x);
+}
+
+} // namespace
 
 AudioEngine::~AudioEngine() { shutdown(); }
 
@@ -67,7 +89,9 @@ void AudioEngine::noteOn(int keyIndex, double frequency)
                                .phase = 0.0,
                                .amplitude = 0.0,
                                .pressed = true,
-                               .releaseSamplesLeft = 0};
+                               .releaseSamplesLeft = 0,
+                               .releaseTotalSamples = 0,
+                               .releaseStartAmplitude = 0.0};
 }
 
 void AudioEngine::noteOff(int keyIndex)
@@ -79,8 +103,11 @@ void AudioEngine::noteOff(int keyIndex)
         return;
     }
 
-    it->second.pressed = false;
-    it->second.releaseSamplesLeft = (SAMPLE_RATE * RELEASE_MS) / 1000;
+    Voice &v = it->second;
+    v.pressed = false;
+    v.releaseTotalSamples = std::max(1, (SAMPLE_RATE * RELEASE_MS) / 1000);
+    v.releaseSamplesLeft = v.releaseTotalSamples;
+    v.releaseStartAmplitude = v.amplitude;
 }
 
 void AudioEngine::audioCallback(void *userdata, Uint8 *stream, int len)
@@ -115,10 +142,14 @@ void AudioEngine::renderAudio(float *out, int frames)
             }
             else if (voice.releaseSamplesLeft > 0)
             {
-                const double factor = std::pow(
-                    0.0005,
-                    1.0 / static_cast<double>(voice.releaseSamplesLeft));
-                voice.amplitude *= factor;
+                const int total = voice.releaseTotalSamples;
+                const int left = voice.releaseSamplesLeft;
+                const float p = static_cast<float>(total - left) /
+                                static_cast<float>(total);
+                const float env = 1.0f - smoothstep(0.0f, 1.0f, p);
+
+                voice.amplitude =
+                    voice.releaseStartAmplitude * static_cast<double>(env);
                 --voice.releaseSamplesLeft;
             }
 
