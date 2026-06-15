@@ -20,9 +20,22 @@ Task<void> AsyncCopyFile(Dispatcher& dispatcher, std::string from, std::string t
 
     std::vector<char> buffer(1024);
 
-    for (unsigned bytesRead = 0;
-         (bytesRead = co_await input.ReadAsync(dispatcher, buffer.data(), buffer.size())) != 0;) {
-        co_await output.AsyncWrite(dispatcher, buffer.data(), bytesRead);
+    while (true) {
+        const unsigned bytesRead = co_await input.ReadAsync(
+            dispatcher,
+            buffer.data(),
+            buffer.size()
+        );
+
+        if (bytesRead == 0) {
+            break;
+        }
+
+        co_await output.AsyncWrite(
+            dispatcher,
+            buffer.data(),
+            bytesRead
+        );
     }
 }
 
