@@ -76,11 +76,29 @@ void PrintRow(
     double milliseconds)
 {
     std::cout
-        << threadCount << ','
-        << implementation << ','
+        << std::left
+        << std::setw(12) << threadCount
+        << std::setw(20) << implementation
+        << std::right
+        << std::setw(15)
         << std::fixed
         << std::setprecision(3)
         << milliseconds
+        << '\n';
+}
+
+void PrintHeader()
+{
+    std::cout
+        << std::left
+        << std::setw(12) << "Threads"
+        << std::setw(20) << "Implementation"
+        << std::right
+        << std::setw(15) << "Time, ms"
+        << '\n';
+
+    std::cout
+        << std::string(47, '-')
         << '\n';
 }
 
@@ -117,7 +135,7 @@ int main(int argc, char* argv[])
                 "Task and thread counts must be greater than zero");
         }
 
-        std::cout << "threads,implementation,time_ms\n";
+        PrintHeader();
 
         for (std::size_t threadCount = 1;
              threadCount <= maximumThreadCount;

@@ -9,17 +9,37 @@ import matplotlib.pyplot as plt
 
 
 def ReadResults(path: Path):
-    results = defaultdict(lambda: {"threads": [], "times": []})
+    results = defaultdict(
+        lambda: {
+            "threads": [],
+            "times": [],
+        }
+    )
 
-    with path.open("r", encoding="utf-8", newline="") as file:
-        reader = csv.DictReader(file)
+    with path.open("r", encoding="utf-8") as file:
+        for line in file:
+            line = line.strip()
 
-        for row in reader:
-            implementation = row["implementation"]
-            results[implementation]["threads"].append(
-                int(row["threads"]))
-            results[implementation]["times"].append(
-                float(row["time_ms"]))
+            if not line:
+                continue
+
+            if line.startswith("Threads"):
+                continue
+
+            if set(line) == {"-"}:
+                continue
+
+            parts = line.split()
+
+            if len(parts) != 3:
+                continue
+
+            threadCount = int(parts[0])
+            implementation = parts[1]
+            milliseconds = float(parts[2])
+
+            results[implementation]["threads"].append(threadCount)
+            results[implementation]["times"].append(milliseconds)
 
     return results
 
